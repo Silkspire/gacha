@@ -1,0 +1,7 @@
+name
+rarity
+level
+health
+mana?
+atk dmg
+
