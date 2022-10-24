@@ -91,6 +91,7 @@ async def uptime(ctx):
 
 #bot.load_extension('cogs.pagetest')
 bot.load_extension('cogs.mainmenu')
+bot.load_extension('cogs.admincommands')
 
 
 def close_database():

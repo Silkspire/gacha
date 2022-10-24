@@ -3,6 +3,7 @@ from discord.ext import commands
 import asyncio
 from random import randint
 import db
+import classes
 
 class MyView(discord.ui.View):
     #@discord.ui.button(label="Punch", style=discord.ButtonStyle.primary, emoji="🔘")
@@ -90,8 +91,8 @@ class MainMenu(commands.Cog):
     async def test_fight(self, ctx):
     # OOP tho
     # TODO: turn "status" into OOP class
-        if not db.user_exists(ctx.author.id):
-            print('USER DOES NOT EXIST')
+        user = db.check_user(ctx.author.id)
+        db.instantiate_character(user.id, 1)
         player = Player(randint(1,1000), randint(75,150))
         enemy = Enemy(randint(1,1000), randint(75,150))
         game = GameState(player, enemy)
@@ -139,6 +140,9 @@ class MainMenu(commands.Cog):
             else:
                 await message.edit_original_response(embed=embed)
 
+    @discord.slash_command()
+    async def menu(self, ctx):
+        await ctx.respond("Menu Placeholder")
 
 def setup(bot):
     bot.add_cog(MainMenu(bot))

@@ -21,4 +21,4 @@ input_path     = "img/src/"
 
 
 
-db.instantiate_character(base_character_id, owner_id)
+#db.instantiate_character(base_character_id, owner_id)
