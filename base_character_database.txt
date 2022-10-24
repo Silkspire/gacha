@@ -1,7 +1,76 @@
-name
-rarity
-level
-health
-mana?
-atk dmg
 
+Databae:
+
+
+## Base Rollable Characters ##
+CREATE TABLE base_characters(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        type TEXT DEFAULT "basic_character",
+        series INTEGER,
+        rarity TEXT,
+        max_health INTEGER,
+        max_mana INTEGER,
+        armor INTEGER,
+        attack INTEGER,
+        image TEXT
+);
+
+## Instantiated Character Stats ##
+CREATE TABLE character_instances(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        base_id INTEGER,
+        base_name TEXT,
+        owner INTEGER,
+        name TEXT DEFAULT "",
+        named INTEGER DEFAULT 0,
+        series INTEGER,
+        rarity TEXT,
+        type TEXT DEFAULT "unnamed_character",
+        level INTEGER DEFAULT 1,
+        experience INTEGER DEFAULT 0,
+        max_health INTEGER,
+        max_mana INTEGER,
+        armor INTEGER,
+        attack INTEGER,
+        image TEXT
+);
+
+
+## Users ##
+CREATE TABLE users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        discord_id INTEGER,
+        stamina INTEGER DEFAULT 30,
+        roll_currency INTEGER DEFAULT 10,
+        normal_currency INTEGER DEFAULT 1000
+);
+
+
+
+## Weapons ##
+CREATE TABLE base_weapons(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        type TEXT DEFAULT "basic_weapon",
+        series INTEGER,
+        named INTEGER DEFAULT 0,
+        rarity TEXT,
+        attack INTEGER,
+        image TEXT
+);
+
+Monsters
+
+User Ownerships(?)
+
+List of abilities
+
+
+
+
+PRIVACY POLICY
+https://discord.com/developers/docs/legal
+
+
+make troubleshooting checklist for slash commands

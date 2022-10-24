@@ -25,6 +25,7 @@ import traceback
 import uuid
 import db
 
+
 startup_time = datetime.datetime.now()
 intents = discord.Intents.default()
 #intents.members = True
@@ -44,8 +45,6 @@ except:
     quit()
 
 
-
-prefix = '!'
 
 # class MyBot(commands.Bot):
 #     def __init__(self, *args, **kwargs):
@@ -92,6 +91,7 @@ async def uptime(ctx):
 
 #bot.load_extension('cogs.pagetest')
 bot.load_extension('cogs.mainmenu')
+
 
 def close_database():
     db.close_database()

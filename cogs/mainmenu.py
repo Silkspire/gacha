@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import asyncio
 from random import randint
+import db
 
 class MyView(discord.ui.View):
     #@discord.ui.button(label="Punch", style=discord.ButtonStyle.primary, emoji="🔘")
@@ -18,6 +19,7 @@ class Player():
         self.atk = attack
     def damage(self, amount):
         self.hp -= amount
+        return amount
 
 class Enemy():
     def __init__(self, health=100, attack=20):
@@ -26,30 +28,30 @@ class Enemy():
         self.atk = attack
     def damage(self, amount):
         self.hp -= amount
+        return amount
 
 class GameState():
     def __init__(self, player, enemy):
         self.player = player
         self.enemy = enemy
         self.turn = '0'
-        self.log = "Fight has started"
-        self.log_list = ["Fight has started"]
+        self.log_list = ['⠀','⠀','⠀',"Fight has started"]
+        self.log = '\n'.join(self.log_list)
     def add_log(self, line: str):
         self.log_list.append(line)
         self.log = '\n'.join(self.log_list)
-        if len(self.log_list) > 4:
-            self.log_list.pop(0)
+        self.log_list.pop(0)
     def next_turn(self):
         self.turn = str(int(self.turn) + 1)
 
 
 def player_turn(game):
-    dmg = game.enemy.damage(randint(game.player.atk-game.player.atk*0.5, game.player.atk+game.player.atk*1.5))
+    dmg = game.enemy.damage(randint(game.player.atk-int(game.player.atk*0.5), game.player.atk+int(game.player.atk*1.5)))
     game.add_log(f"P{game.turn}: Player attacked Enemy for {dmg} damage")
     return game
 
 def enemy_turn(game):
-    dmg = game.player.damage(randint(game.enemy.atk-game.enemy.atk*0.5, game.enemy.atk+game.enemy.atk*1.5))
+    dmg = game.player.damage(randint(game.enemy.atk-int(game.enemy.atk*0.5), game.enemy.atk+int(game.enemy.atk*1.5)))
     game.add_log(f"E{game.turn}: Enemy attacked Player for {dmg} damage")
     return game
 
@@ -88,9 +90,10 @@ class MainMenu(commands.Cog):
     async def test_fight(self, ctx):
     # OOP tho
     # TODO: turn "status" into OOP class
-
-        player = Player(randint(1,1000), randint(1,1000))
-        enemy = Enemy(randint(1,1000), randint(1,1000))
+        if not db.user_exists(ctx.author.id):
+            print('USER DOES NOT EXIST')
+        player = Player(randint(1,1000), randint(75,150))
+        enemy = Enemy(randint(1,1000), randint(75,150))
         game = GameState(player, enemy)
         #log = 'Fight started'
         # char_health = 100
