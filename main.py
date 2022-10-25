@@ -9,7 +9,7 @@ from discord.ext import tasks
 #from discord import Option
 import datetime
 import requests
-import requests_cache
+#import requests_cache
 import json
 import aiosqlite
 import sqlite3
