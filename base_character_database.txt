@@ -43,7 +43,9 @@ CREATE TABLE users(
         discord_id INTEGER,
         stamina INTEGER DEFAULT 30,
         roll_currency INTEGER DEFAULT 10,
-        normal_currency INTEGER DEFAULT 1000
+        normal_currency INTEGER DEFAULT 1000,
+        founder INTEGER DEFAULT 0,
+        premium INTEGER DEFAULT 0
 );
 
 
