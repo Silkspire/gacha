@@ -25,19 +25,20 @@ def close_database():
 
 
 def check_user(discord_id):
-    #try:
-    user = classes.User(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
+    try:
+        user = classes.User(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
     #print(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
-    print(str(user.discord_id))
-    return user
-    # except:
-    #     print("user doesn't exist")
-    #     add_user(discord_id)
-    #     return False
+        print(str(user.discord_id))
+        return user
+    except:
+        print("user doesn't exist")
+        user = add_user(discord_id)
+        return user
 
 def add_user(discord_id):
     conn.execute("INSERT INTO users (discord_id) VALUES (?)", (discord_id,))
     conn.commit()
+    return classes.User(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
 
 
 def get_base_character(id):

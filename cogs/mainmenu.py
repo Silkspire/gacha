@@ -93,8 +93,8 @@ class MainMenu(commands.Cog):
     # TODO: turn "status" into OOP class
         user = db.check_user(ctx.author.id)
         db.instantiate_character(user.id, 1)
-        player = Player(randint(1,1000), randint(75,150))
-        enemy = Enemy(randint(1,1000), randint(75,150))
+        player = Player(randint(500,1000), randint(75,150))
+        enemy = Enemy(randint(500,1000), randint(75,150))
         game = GameState(player, enemy)
         #log = 'Fight started'
         # char_health = 100
