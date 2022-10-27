@@ -1,6 +1,12 @@
 import sqlite3
 import atexit
-import classes
+from classes.BaseCharacter import *
+from classes.Enemy import *
+from classes.GameState import *
+from classes.InstantiatedCharacter import *
+from classes.Monster import *
+from classes.Player import *
+from classes.User import *
 
 db = 'database.db'
 conn = sqlite3.connect(db)
@@ -25,7 +31,7 @@ def close_database():
 
 def check_user(discord_id):
     try:
-        user = classes.User(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
+        user = User(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
         return user
     except:
         print("user doesn't exist")
@@ -35,27 +41,34 @@ def check_user(discord_id):
 def add_user(discord_id):
     conn.execute("INSERT INTO users (discord_id) VALUES (?)", (discord_id,))
     conn.commit()
-    return classes.User(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
+    return User(
+        conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
+
+def spend_roll_currency(id, number):
+    current = conn.execute("SELECT roll_currency FROM users WHERE id = ?", (id,)).fetchone()[0]
+    conn.execute("UPDATE users SET roll_currency = ? WHERE id = ?", (current-number,id))
+    conn.commit()
 
 def get_selected_character(id):
     # replace with nested SELECT statement
     char_id = conn.execute("SELECT selected_character FROM users WHERE id=?", (id,)).fetchone()[0]
-    ic = get_instantiated_character(char_id)
+    #ic = get_instantiated_character(char_id)
+    ic = conn.execute("SELECT * FROM character_instances WHERE id = ?", (char_id,)).fetchone()
     return ic
 
 def get_base_character(id):
-    return classes.BaseCharacter(conn.execute("SELECT * FROM base_characters WHERE id = ?", (id,)).fetchone())
-
+    return BaseCharacter(
+        conn.execute("SELECT * FROM base_characters WHERE id = ?", (id,)).fetchone())
 
 def get_instantiated_character(id):
-    return classes.InstantiatedCharacter(conn.execute("SELECT * FROM character_instances WHERE id = ?", (id,)).fetchone())
-
+    return InstantiatedCharacter(
+        conn.execute("SELECT * FROM character_instances WHERE id = ?", (id,)).fetchone())
 
 def get_owned_characters(owner_id):
     return conn.execute("SELECT name FROM character_instances WHERE owner = ?", (owner_id,)).fetchall()
 
 def get_monster(difficulty):
-    return classes.Monster(conn.execute("SELECT * FROM monsters WHERE difficulty = ? ORDER BY RANDOM() LIMIT 1", (difficulty,)).fetchone())
+    return conn.execute("SELECT * FROM monsters WHERE difficulty = ? ORDER BY RANDOM() LIMIT 1", (difficulty,)).fetchone()
 
 def instantiate_character(owner_id, base_character_id):
     base = get_base_character(base_character_id)

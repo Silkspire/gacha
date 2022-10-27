@@ -3,9 +3,16 @@ from discord.ext import commands
 import asyncio
 from random import randint
 import db
-import classes
 from discord import option
 from typing import Optional
+
+from classes.BaseCharacter import *
+from classes.Enemy import *
+from classes.GameState import *
+from classes.InstantiatedCharacter import *
+from classes.Monster import *
+from classes.Player import *
+from classes.User import *
 
 class MyView(discord.ui.View):
     #@discord.ui.button(label="Punch", style=discord.ButtonStyle.primary, emoji="🔘")
@@ -15,47 +22,17 @@ class MyView(discord.ui.View):
         #await interaction.response.send_message("You clickied")
         await interaction.response.edit_message(view=self)
 
-class Player(InstantiatedCharacter):
-    def __init__(self, tupple):
-        super().__init__(tupple)
-        self.hp = self.max_hp
-        self.mana = self.max_mana
-    def damage(self, amount):
-        self.hp -= amount
-        return amount
-
-class Enemy(Monster):
-    def __init__(self, tupple):
-        super().__init__(tupple)
-        self.hp = self.max_health
-        self.mana = self.max_mana
-    def damage(self, amount):
-        self.hp -= amount
-        return amount
-
-class GameState():
-    def __init__(self, player, enemy):
-        self.player = player
-        self.enemy = enemy
-        self.turn = '0'
-        self.log_list = ['⠀','⠀','⠀',"Fight has started"]
-        self.log = '\n'.join(self.log_list)
-    def add_log(self, line: str):
-        self.log_list.append(line)
-        self.log = '\n'.join(self.log_list)
-        self.log_list.pop(0)
-    def next_turn(self):
-        self.turn = str(int(self.turn) + 1)
-
 
 def player_turn(game):
-    dmg = game.enemy.damage(randint(game.player.attack-int(game.player.attack*0.5), game.player.attack+int(game.player.attack*1.5)))
-    game.add_log(f"P{game.turn}: Player attacked Enemy for {dmg} damage")
+    #dmg = enemy damage +- 25%
+    dmg = game.enemy.damage(randint(game.player.attack-int(game.player.attack*0.75), game.player.attack+int(game.player.attack*1.25)))
+    game.add_log(f"P{game.round}: Player attacked Enemy for {dmg} damage")
     return game
 
 def enemy_turn(game):
-    dmg = game.player.damage(randint(game.enemy.attack-int(game.enemy.attack*0.5), game.enemy.attack+int(game.enemy.attack*1.5)))
-    game.add_log(f"E{game.turn}: Enemy attacked Player for {dmg} damage")
+    #dmg = player damage +- 25%
+    dmg = game.player.damage(randint(game.enemy.attack-int(game.enemy.attack*0.75), game.enemy.attack+int(game.enemy.attack*1.25)))
+    game.add_log(f"E{game.round}: Enemy attacked Player for {dmg} damage")
     return game
 
 def win(game):
@@ -103,7 +80,11 @@ class MainMenu(commands.Cog):
     )
     async def buy_pack(self, ctx, *, number: Optional[int] = 1):
         user = db.check_user(ctx.author.id)
+        if user.roll_currency < number * 1:
+            await ctx.respond("Not enough roll currency.")
+            return
         character_ids = db.gacha_character(user.id, number)
+        user.spend_roll_currency((number*1))
         output = 'Received:\n'
         for id in character_ids:
             char=db.get_base_character(id)
@@ -124,11 +105,11 @@ class MainMenu(commands.Cog):
 
     @discord.slash_command()
     async def test_fight(self, ctx):
-    # OOP tho
-    # TODO: turn "status" into OOP class
+        difficulty = 'easy'
         user = db.check_user(ctx.author.id)
         player = Player(db.get_selected_character(user.id))
-        enemy = Enemy(randint(500,1000), randint(75,150))
+
+        enemy = Enemy(db.get_monster(difficulty))
         game = GameState(player, enemy)
         #log = 'Fight started'
         # char_health = 100
@@ -137,22 +118,22 @@ class MainMenu(commands.Cog):
         # enemy_attack = 20
         embed = discord.Embed()
         embed.title = "Fight"
-        embed.set_thumbnail(url = ctx.author.display_avatar.url)
-        embed.add_field(name = 'Turn', value = game.turn)
-        embed.add_field(name = 'Player Health', value = f'{game.player.max_hp}/{game.player.max_hp}')
-        embed.add_field(name = 'Enemy Health', value = f'{game.enemy.max_hp}/{game.enemy.max_hp}')
+        embed.set_thumbnail(url = player.image)
+        embed.add_field(name = 'Round', value = game.round)
+        embed.add_field(name = 'Player Health', value = f'{game.player.max_health}/{game.player.max_health}')
+        embed.add_field(name = 'Enemy Health', value = f'{game.enemy.max_health}/{game.enemy.max_health}')
         embed.add_field(name = 'Combat Log', value = game.log)
-        embed.set_image(url="https://media.discordapp.net/attachments/1015443526567346237/1032033260441718916/FfWytuRX0AAYiY_.jpg")
+        embed.set_image(url = enemy.image)
         message = await ctx.respond(embed=embed)
         #status = (player, enemy)
 
         while True:
             await asyncio.sleep(2)
-            game.next_turn()
+            game.next_round()
             game = player_turn(game)
-            embed.set_field_at(0, name = "Turn", value = game.turn)
-            embed.set_field_at(1, name = "Player Health", value = f'{game.player.hp}/{game.player.max_hp}')
-            embed.set_field_at(2, name = "Enemy Health", value = f'{game.enemy.hp}/{game.enemy.max_hp}')
+            embed.set_field_at(0, name = "Round", value = game.round)
+            embed.set_field_at(1, name = "Player Health", value = f'{game.player.hp}/{game.player.max_health}')
+            embed.set_field_at(2, name = "Enemy Health", value = f'{game.enemy.hp}/{game.enemy.max_health}')
             embed.set_field_at(3, name = "Combat Log", value=game.log)
             if win(game):
                 #embed.add_field(name='Victory', value='Yay')
@@ -163,8 +144,8 @@ class MainMenu(commands.Cog):
                 await message.edit_original_response(embed=embed)
             await asyncio.sleep(2)
             game = enemy_turn(game)
-            embed.set_field_at(1, name = "Player Health", value = f'{game.player.hp}/{game.player.max_hp}')
-            embed.set_field_at(2, name = "Enemy Health", value = f'{game.enemy.hp}/{game.enemy.max_hp}')
+            embed.set_field_at(1, name = "Player Health", value = f'{game.player.hp}/{game.player.max_health}')
+            embed.set_field_at(2, name = "Enemy Health", value = f'{game.enemy.hp}/{game.enemy.max_health}')
             embed.set_field_at(3, name = "Combat Log", value=game.log)
             if loss(game):
                 #embed.add_field(name='Loss', value='oh no')
