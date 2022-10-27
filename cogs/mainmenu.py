@@ -4,6 +4,8 @@ import asyncio
 from random import randint
 import db
 import classes
+from discord import option
+from typing import Optional
 
 class MyView(discord.ui.View):
     #@discord.ui.button(label="Punch", style=discord.ButtonStyle.primary, emoji="🔘")
@@ -13,20 +15,20 @@ class MyView(discord.ui.View):
         #await interaction.response.send_message("You clickied")
         await interaction.response.edit_message(view=self)
 
-class Player():
-    def __init__(self, health=100, attack=35):
-        self.max_hp = health
-        self.hp = health
-        self.atk = attack
+class Player(InstantiatedCharacter):
+    def __init__(self, tupple):
+        super().__init__(tupple)
+        self.hp = self.max_hp
+        self.mana = self.max_mana
     def damage(self, amount):
         self.hp -= amount
         return amount
 
-class Enemy():
-    def __init__(self, health=100, attack=20):
-        self.max_hp = health
-        self.hp = health
-        self.atk = attack
+class Enemy(Monster):
+    def __init__(self, tupple):
+        super().__init__(tupple)
+        self.hp = self.max_health
+        self.mana = self.max_mana
     def damage(self, amount):
         self.hp -= amount
         return amount
@@ -47,12 +49,12 @@ class GameState():
 
 
 def player_turn(game):
-    dmg = game.enemy.damage(randint(game.player.atk-int(game.player.atk*0.5), game.player.atk+int(game.player.atk*1.5)))
+    dmg = game.enemy.damage(randint(game.player.attack-int(game.player.attack*0.5), game.player.attack+int(game.player.attack*1.5)))
     game.add_log(f"P{game.turn}: Player attacked Enemy for {dmg} damage")
     return game
 
 def enemy_turn(game):
-    dmg = game.player.damage(randint(game.enemy.atk-int(game.enemy.atk*0.5), game.enemy.atk+int(game.enemy.atk*1.5)))
+    dmg = game.player.damage(randint(game.enemy.attack-int(game.enemy.attack*0.5), game.enemy.attack+int(game.enemy.attack*1.5)))
     game.add_log(f"E{game.turn}: Enemy attacked Player for {dmg} damage")
     return game
 
@@ -88,19 +90,51 @@ class MainMenu(commands.Cog):
         await ctx.respond("do it", view=MyView())
 
     @discord.slash_command()
+    async def buy_character(self, ctx):
+        pass
+
+    @discord.slash_command(name='buy_character_pack')
+    @option(
+        'number',
+        int,
+        description='How many characters to buy',
+        required=False,
+        choices=[1, 10]
+    )
+    async def buy_pack(self, ctx, *, number: Optional[int] = 1):
+        user = db.check_user(ctx.author.id)
+        character_ids = db.gacha_character(user.id, number)
+        output = 'Received:\n'
+        for id in character_ids:
+            char=db.get_base_character(id)
+            output+=char.name+'\n'
+        await ctx.respond(output)
+
+    @discord.slash_command()
+    async def select_character(self, ctx):
+        user = db.check_user(ctx.author.id)
+        characters = db.get_owned_characters(user.id)
+        output = ''
+        embed=discord.Embed()
+        embed.title="Select:"
+        for char in characters:
+            output += char+'\n'
+        embed.add_field(name = "Characters", value = output)
+        await ctx.respond(embed=embed)
+
+    @discord.slash_command()
     async def test_fight(self, ctx):
     # OOP tho
     # TODO: turn "status" into OOP class
         user = db.check_user(ctx.author.id)
-        db.instantiate_character(user.id, 1)
-        player = Player(randint(500,1000), randint(75,150))
+        player = Player(db.get_selected_character(user.id))
         enemy = Enemy(randint(500,1000), randint(75,150))
         game = GameState(player, enemy)
         #log = 'Fight started'
         # char_health = 100
         # enemy_health = 100
-        # char_atk = 35
-        # enemy_atk = 20
+        # char_attack = 35
+        # enemy_attack = 20
         embed = discord.Embed()
         embed.title = "Fight"
         embed.set_thumbnail(url = ctx.author.display_avatar.url)

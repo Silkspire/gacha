@@ -4,7 +4,6 @@ import classes
 
 db = 'database.db'
 conn = sqlite3.connect(db)
-print(conn.execute("SELECT name FROM keys LIMIT 1").fetchone()[0])
 
 
 def get_discord_token():
@@ -27,8 +26,6 @@ def close_database():
 def check_user(discord_id):
     try:
         user = classes.User(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
-    #print(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
-        print(str(user.discord_id))
         return user
     except:
         print("user doesn't exist")
@@ -40,14 +37,25 @@ def add_user(discord_id):
     conn.commit()
     return classes.User(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
 
+def get_selected_character(id):
+    # replace with nested SELECT statement
+    char_id = conn.execute("SELECT selected_character FROM users WHERE id=?", (id,)).fetchone()[0]
+    ic = get_instantiated_character(char_id)
+    return ic
 
 def get_base_character(id):
     return classes.BaseCharacter(conn.execute("SELECT * FROM base_characters WHERE id = ?", (id,)).fetchone())
 
 
 def get_instantiated_character(id):
-    pass#TODO
+    return classes.InstantiatedCharacter(conn.execute("SELECT * FROM character_instances WHERE id = ?", (id,)).fetchone())
 
+
+def get_owned_characters(owner_id):
+    return conn.execute("SELECT name FROM character_instances WHERE owner = ?", (owner_id,)).fetchall()
+
+def get_monster(difficulty):
+    return classes.Monster(conn.execute("SELECT * FROM monsters WHERE difficulty = ? ORDER BY RANDOM() LIMIT 1", (difficulty,)).fetchone())
 
 def instantiate_character(owner_id, base_character_id):
     base = get_base_character(base_character_id)
@@ -59,7 +67,16 @@ def instantiate_character(owner_id, base_character_id):
     (base.id, base.name, owner_id, base.series, base.rarity, base.max_health, base.max_mana, base.armor, base.attack, base.image,))
     conn.commit()
 
-    print("Instantiated character")
+    print(f"Instantiated character {base.name} to user {owner_id}")
+
+def gacha_character(owner_id, number):
+    gacha_list = []
+    for n in range(number):
+        gacha = conn.execute("SELECT id FROM base_characters ORDER BY RANDOM() LIMIT 1").fetchone()[0]
+        gacha_list.append(gacha)
+    for id in gacha_list:
+        instantiate_character(owner_id, id)
+    return gacha_list
 
 def clear_all():
     conn.execute("DELETE FROM users")
@@ -68,3 +85,4 @@ def clear_all():
 
 # insert base character
 # INSERT INTO base_characters (name, series, rarity, max_health, max_mana, armor, attack, image) VALUES ("Creation #1", 1, "Common", 100, 100, 5, 15, "img/characters/tmp_mdtvdek.png");
+# INSERT INTO monsters (name, series, rarity, difficulty, max_health, max_mana, armor, attack, image) VALUES ("Monster #1", 1, "Common", "easy", 75, 25, 0, 7, "img/monsters/1.png");

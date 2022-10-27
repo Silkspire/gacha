@@ -10,6 +10,7 @@ class AdminCommands(commands.Cog):
     @discord.slash_command()
     async def clear_all(self, ctx):
         db.clear_all()
+        await ctx.respond('Databae cleared!')
 
 
 def setup(bot):

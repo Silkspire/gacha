@@ -16,6 +16,22 @@ CREATE TABLE base_characters(
         image TEXT
 );
 
+
+## Monsters ##
+CREATE TABLE monsters(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        type TEXT DEFAULT "monster",
+        series INTEGER,
+        rarity TEXT,
+        difficulty TEXT,
+        max_health INTEGER,
+        max_mana INTEGER,
+        armor INTEGER,
+        attack INTEGER,
+        image TEXT
+);
+
 ## Instantiated Character Stats ##
 CREATE TABLE character_instances(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +61,8 @@ CREATE TABLE users(
         roll_currency INTEGER DEFAULT 10,
         normal_currency INTEGER DEFAULT 1000,
         founder INTEGER DEFAULT 0,
-        premium INTEGER DEFAULT 0
+        premium INTEGER DEFAULT 0,
+        selected_character INTEGER DEFAULT 0
 );
 
 

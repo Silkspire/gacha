@@ -12,6 +12,10 @@ class BaseCharacter():
         self.attack = tupple[8]
         self.image = tupple[9]
 
+# class PlayerCharacter(InstantiatedCharacter):
+#     def __init__():
+#         pass
+
 class InstantiatedCharacter():
     def __init__(self, tupple):
         self.id = tupple[0]
@@ -38,3 +42,17 @@ class User():
         self.stamina = tupple[2]
         self.roll_currency = tupple[3]
         self.normal_currency = tupple[4]
+
+class Monster():
+    def __init__(self, tupple):
+        self.id = tupple[0]
+        self.name = tupple[1]
+        self.type = tupple[2]
+        self.series = tupple[3]
+        self.rarity = tupple[4]
+        self.difficulty = tupple[5]
+        self.max_health = tupple[6]
+        self.max_mana = tupple[7]
+        self.armor = tupple[8]
+        self.attack = tupple[9]
+        self.image = tupple[10]
