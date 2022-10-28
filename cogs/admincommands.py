@@ -8,8 +8,8 @@ class AdminCommands(commands.Cog):
         self.bot = bot
 
     @discord.slash_command()
-    async def clear_all(self, ctx):
-        db.clear_all()
+    async def reset(self, ctx):
+        db.reset()
         await ctx.respond('Databae cleared!')
 
 

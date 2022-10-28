@@ -29,7 +29,7 @@ def close_database():
 
 
 
-def check_user(discord_id):
+def get_user(discord_id):
     try:
         user = User(conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
         return user
@@ -56,6 +56,11 @@ def get_selected_character(id):
     ic = conn.execute("SELECT * FROM character_instances WHERE id = ?", (char_id,)).fetchone()
     return ic
 
+def set_selected_character(user_id, char_id):
+    conn.execute("UPDATE users SET selected_character = ? WHERE id = ?",
+    (char_id, user_id,))
+    conn.commit()
+
 def get_base_character(id):
     return BaseCharacter(
         conn.execute("SELECT * FROM base_characters WHERE id = ?", (id,)).fetchone())
@@ -65,7 +70,7 @@ def get_instantiated_character(id):
         conn.execute("SELECT * FROM character_instances WHERE id = ?", (id,)).fetchone())
 
 def get_owned_characters(owner_id):
-    return conn.execute("SELECT name FROM character_instances WHERE owner = ?", (owner_id,)).fetchall()
+    return conn.execute("SELECT id, base_name FROM character_instances WHERE owner = ?", (owner_id,)).fetchall()
 
 def get_monster(difficulty):
     return conn.execute("SELECT * FROM monsters WHERE difficulty = ? ORDER BY RANDOM() LIMIT 1", (difficulty,)).fetchone()
@@ -91,7 +96,7 @@ def gacha_character(owner_id, number):
         instantiate_character(owner_id, id)
     return gacha_list
 
-def clear_all():
+def reset():
     conn.execute("DELETE FROM users")
     conn.execute("DELETE FROM character_instances")
     conn.commit()

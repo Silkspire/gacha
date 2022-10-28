@@ -54,21 +54,21 @@ class MainMenu(commands.Cog):
         self.bot = bot
 
     
-    @discord.slash_command()
-    async def test(self, ctx):
-        await ctx.respond("This is a test", ephemeral=True)
+    # @discord.slash_command()
+    # async def test(self, ctx):
+    #     await ctx.respond("This is a test", ephemeral=True)
 
-    @discord.user_command()
-    async def test_user(self, ctx, member: discord.Member):
-        await ctx.respond(f'{ctx.author.mention} says hello to {member.name}')
+    # @discord.user_command()
+    # async def test_user(self, ctx, member: discord.Member):
+    #     await ctx.respond(f'{ctx.author.mention} says hello to {member.name}')
     
-    @discord.slash_command()
-    async def button_test(self, ctx):
-        await ctx.respond("do it", view=MyView())
+    # @discord.slash_command()
+    # async def button_test(self, ctx):
+    #     await ctx.respond("do it", view=MyView())
 
-    @discord.slash_command()
-    async def buy_character(self, ctx):
-        pass
+    # @discord.slash_command()
+    # async def buy_character(self, ctx):
+    #     pass
 
     @discord.slash_command(name='buy_character_pack')
     @option(
@@ -79,7 +79,7 @@ class MainMenu(commands.Cog):
         choices=[1, 10]
     )
     async def buy_pack(self, ctx, *, number: Optional[int] = 1):
-        user = db.check_user(ctx.author.id)
+        user = db.get_user(ctx.author.id)
         if user.roll_currency < number * 1:
             await ctx.respond("Not enough roll currency.")
             return
@@ -93,20 +93,34 @@ class MainMenu(commands.Cog):
 
     @discord.slash_command()
     async def select_character(self, ctx):
-        user = db.check_user(ctx.author.id)
+        options = []
+        
+        user = db.get_user(ctx.author.id)
         characters = db.get_owned_characters(user.id)
-        output = ''
-        embed=discord.Embed()
-        embed.title="Select:"
         for char in characters:
-            output += char+'\n'
-        embed.add_field(name = "Characters", value = output)
-        await ctx.respond(embed=embed)
+            options.append(discord.SelectOption(
+                    label=f"{char[0]}: {char[1]}",
+                    value=str(char[0]),
+                    description='this is a desc'
+                ))
+
+        class MyView(discord.ui.View):
+            @discord.ui.select(
+                placeholder = "Select character",
+                options = options,
+            )
+            async def select_callback(self, select, interaction):
+                user.switch_selected_character(select.values[0])
+                await interaction.response.send_message(f"Selected {select.values[0]}")
+        view=MyView()
+        # TODO?: remove the selector after user interaction
+        # it keeps working tho
+        await ctx.respond(view=view, ephemeral=True)
 
     @discord.slash_command()
     async def test_fight(self, ctx):
         difficulty = 'easy'
-        user = db.check_user(ctx.author.id)
+        user = db.get_user(ctx.author.id)
         player = Player(db.get_selected_character(user.id))
 
         enemy = Enemy(db.get_monster(difficulty))
@@ -117,7 +131,7 @@ class MainMenu(commands.Cog):
         # char_attack = 35
         # enemy_attack = 20
         embed = discord.Embed()
-        embed.title = "Fight"
+        embed.title = f"Fight ({player.id})"
         embed.set_thumbnail(url = player.image)
         embed.add_field(name = 'Round', value = game.round)
         embed.add_field(name = 'Player Health', value = f'{game.player.max_health}/{game.player.max_health}')

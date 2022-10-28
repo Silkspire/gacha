@@ -12,3 +12,5 @@ class User():
         self.selected_character = tupple[7]
     def spend_roll_currency(self, number):
         db.spend_roll_currency(self.id, number)
+    def switch_selected_character(self, id):
+        db.set_selected_character(self.id, id)

@@ -1,0 +1,15 @@
+view=discord.ui.View
+
+options=[]
+for i in range(10):
+    options.append(discord.SelectOption(
+        label=i[0],
+        value=i[1]
+    ))
+
+view.add_item(discord.ui.Select(
+    placeholder = "Select",
+    options = options
+))
+
+await ctx.respond(view=view)
