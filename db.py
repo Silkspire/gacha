@@ -44,9 +44,11 @@ def add_user(discord_id):
     return User(
         conn.execute("SELECT * FROM users WHERE discord_id = ?", (discord_id,)).fetchone())
 
-def spend_roll_currency(id, number):
-    current = conn.execute("SELECT roll_currency FROM users WHERE id = ?", (id,)).fetchone()[0]
-    conn.execute("UPDATE users SET roll_currency = ? WHERE id = ?", (current-number,id))
+def get_roll_currency(id):
+    return conn.execute("SELECT roll_currency FROM users WHERE id = ?", (id,)).fetchone()[0]
+    
+def set_roll_currency(id, number):
+    conn.execute("UPDATE users SET roll_currency = ? WHERE id = ?", (number,id))
     conn.commit()
 
 def get_selected_character(id):

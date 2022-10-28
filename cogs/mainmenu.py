@@ -70,6 +70,12 @@ class MainMenu(commands.Cog):
     # async def buy_character(self, ctx):
     #     pass
 
+    @discord.slash_command()
+    async def check_roll_currency(self, ctx):
+        user = db.get_user(ctx.author.id)
+        currency = user.check_roll_currency()
+        await ctx.respond(f"You have {currency} roll currency.")
+
     @discord.slash_command(name='buy_character_pack')
     @option(
         'number',
@@ -81,7 +87,7 @@ class MainMenu(commands.Cog):
     async def buy_pack(self, ctx, *, number: Optional[int] = 1):
         user = db.get_user(ctx.author.id)
         if user.roll_currency < number * 1:
-            await ctx.respond("Not enough roll currency.")
+            await ctx.respond(f"{number} roll currency needed, you only have {user.roll_currency}")
             return
         character_ids = db.gacha_character(user.id, number)
         user.spend_roll_currency((number*1))

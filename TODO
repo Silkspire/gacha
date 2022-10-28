@@ -1,12 +1,10 @@
 1. User startup
 -> "choose between 3 starters"
 
-2. Select Character commands
--> buttons!!!!
 
-get list of owned characters (todo:pagination)
-make buttons?
-or dropdown list?
+2. change character switcher
+one page of 25 options
+selecter with those options
 
+pagination buttons(!!!)
 
-LOOKUP: add select callback 

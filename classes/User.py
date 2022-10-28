@@ -10,7 +10,17 @@ class User():
         self.founder = tupple[5]
         self.premium = tupple[6]
         self.selected_character = tupple[7]
+
+    def check_roll_currency(self):
+        return db.get_roll_currency(self.id)
+
     def spend_roll_currency(self, number):
-        db.spend_roll_currency(self.id, number)
+        new_roll_currency = self.roll_currency - number
+        db.set_roll_currency(self.id, new_roll_currency)
+
+    def gain_roll_currency(self, number):
+        new_roll_currency = self.roll_currency + number
+        db.set_roll_currency(self.id, new_roll_currency)
+
     def switch_selected_character(self, id):
         db.set_selected_character(self.id, id)
