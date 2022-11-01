@@ -1,5 +1,18 @@
 1. User startup
 -> "choose between 3 starters"
+(buttons)
+-> if starter = 0 (false), rerun startup? (probably not necessary)
+(make sure user cannot sell/get rid of their last char)
+-> auto-select starter
+
+2. Do random battles (easy/medium/hard)
+-> implement weapons, armor, trinkets
+
+3. Send characters off to idle resource farming
+
+4. Do basic character gacha
+
+5. 
 
 
 2. change character switcher

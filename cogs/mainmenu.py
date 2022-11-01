@@ -97,6 +97,29 @@ class MainMenu(commands.Cog):
             output+=char.name+'\n'
         await ctx.respond(output)
 
+
+    @discord.slash_command()
+    async def select_starter(self, ctx):
+        # TODO: change from command to auto-thing
+        user = db.get_user(ctx.author.id)
+        text = ""
+        starter_characters = ['Charwaifander', 'Sqwifetle', 'Bulbwaifsaur']
+        for char in starter_characters:
+            text+=char+'\n'
+
+        class MyView(discord.ui.View):
+            @discord.ui.button(label=starter_characters[0], style=discord.ButtonStyle.primary)
+            async def button1_callback(self, button, interaction):
+                await interaction.response.send_message(f"You selected {starter_characters[0]}!")
+            @discord.ui.button(label=starter_characters[1], style=discord.ButtonStyle.primary)
+            async def button2_callback(self, button, interaction):
+                await interaction.response.send_message(f"You selected {starter_characters[1]}!")
+            @discord.ui.button(label=starter_characters[2], style=discord.ButtonStyle.primary, emoji="😎")
+            async def button3_callback(self, button, interaction):
+                await interaction.response.send_message(f"You selected {starter_characters[2]}!")
+
+        await ctx.respond(text, view=MyView())
+
     @discord.slash_command()
     async def select_character(self, ctx):
         options = []
