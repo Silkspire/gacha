@@ -93,3 +93,12 @@ https://discord.com/developers/docs/legal
 
 
 make troubleshooting checklist for slash commands
+
+
+# STARTERS
+INSERT INTO base_characters (name, series, rarity, max_health, max_mana, armor, attack, image) VALUES ("Warrior", 1, "Common", 150, 20, 10, 6, "https://media.discordapp.net/attachments/1032055179610177578/1032080839787425843/unknown.png");
+INSERT INTO base_characters (name, series, rarity, max_health, max_mana, armor, attack, image) VALUES ("Rogue", 1, "Common", 100, 70, 2, 30, "https://media.discordapp.net/attachments/1032055179610177578/1032055366248321145/tmpa53vcf3h.png");
+INSERT INTO base_characters (name, series, rarity, max_health, max_mana, armor, attack, image) VALUES ("Wizard", 1, "Common", 100, 200, 0, 15, "https://media.discordapp.net/attachments/1032055179610177578/1032060154872598568/tmpvqea90gm.png");
+
+# MONSTER
+INSERT INTO monsters (name, series, rarity, difficulty, max_health, max_mana, armor, attack, image) VALUES ("Monster #1", 1, "Common", "easy", 75, 25, 0, 7, "https://media.discordapp.net/attachments/1032055179610177578/1037085905317535884/unknown.png");

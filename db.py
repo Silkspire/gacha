@@ -35,8 +35,8 @@ def get_user(discord_id):
         return user
     except:
         print("user doesn't exist")
-        user = add_user(discord_id)
-        return user
+        #user = add_user(discord_id)
+        return False
 
 def add_user(discord_id):
     conn.execute("INSERT INTO users (discord_id) VALUES (?)", (discord_id,))
@@ -103,6 +103,3 @@ def reset():
     conn.execute("DELETE FROM character_instances")
     conn.commit()
 
-# insert base character
-# INSERT INTO base_characters (name, series, rarity, max_health, max_mana, armor, attack, image) VALUES ("Creation #1", 1, "Common", 100, 100, 5, 15, "img/characters/tmp_mdtvdek.png");
-# INSERT INTO monsters (name, series, rarity, difficulty, max_health, max_mana, armor, attack, image) VALUES ("Monster #1", 1, "Common", "easy", 75, 25, 0, 7, "img/monsters/1.png");

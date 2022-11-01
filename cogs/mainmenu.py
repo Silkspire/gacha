@@ -98,10 +98,35 @@ class MainMenu(commands.Cog):
         await ctx.respond(output)
 
 
+    async def user_startup(self, ctx):
+        # TODO: privacy policy link
+        # short description of game?
+        class MyView(discord.ui.View):
+            @discord.ui.button(label='Yes', style=discord.ButtonStyle.green)
+            async def button_callback_yes(self, button, interaction):
+                await interaction.response.edit_message(view=newView())#self)
+                await interaction.response.send_message(f"You selected {starter_characters[0]}!")
+            @discord.ui.button(label='No', style=discord.ButtonStyle.red)
+            async def button_callback_no(self, button, interaction):
+                await interaction.response.edit_message(view=newView())
+                await interaction.response.send_message(f"You selected {starter_characters[0]}!")
+        await ctx.respond("do you want to play a game?", view=MyView())
+
+
+
+    async def check_user(self, ctx):
+        user = db.get_user(ctx.author.id)
+        if user:
+            return user
+        else:
+            await self.user_startup(ctx)
+
+
     @discord.slash_command()
     async def select_starter(self, ctx):
         # TODO: change from command to auto-thing
-        user = db.get_user(ctx.author.id)
+        user = await self.check_user(ctx)
+        #user = db.get_user(ctx.author.id)
         text = ""
         starter_characters = ['Charwaifander', 'Sqwifetle', 'Bulbwaifsaur']
         for char in starter_characters:
