@@ -72,7 +72,9 @@ class MainMenu(commands.Cog):
 
     @discord.slash_command()
     async def check_roll_currency(self, ctx):
-        user = db.get_user(ctx.author.id)
+        user = await self.check_user(ctx)
+        if not user:
+            return
         currency = user.check_roll_currency()
         await ctx.respond(f"You have {currency} roll currency.")
 
@@ -85,7 +87,9 @@ class MainMenu(commands.Cog):
         choices=[1, 10]
     )
     async def buy_pack(self, ctx, *, number: Optional[int] = 1):
-        user = db.get_user(ctx.author.id)
+        user = await self.check_user(ctx)
+        if not user:
+            return
         if user.roll_currency < number * 1:
             await ctx.respond(f"{number} roll currency needed, you only have {user.roll_currency}")
             return
@@ -98,37 +102,12 @@ class MainMenu(commands.Cog):
         await ctx.respond(output)
 
 
-    async def user_startup(self, ctx):
-        # TODO: privacy policy link
-        # short description of game?
-        class MyView(discord.ui.View):
-            @discord.ui.button(label='Yes', style=discord.ButtonStyle.green)
-            async def button_callback_yes(self, button, interaction):
-                await interaction.response.edit_message(view=newView())#self)
-                await interaction.response.send_message(f"You selected {starter_characters[0]}!")
-            @discord.ui.button(label='No', style=discord.ButtonStyle.red)
-            async def button_callback_no(self, button, interaction):
-                await interaction.response.edit_message(view=newView())
-                await interaction.response.send_message(f"You selected {starter_characters[0]}!")
-        await ctx.respond("do you want to play a game?", view=MyView())
-
-
-
-    async def check_user(self, ctx):
-        user = db.get_user(ctx.author.id)
-        if user:
-            return user
-        else:
-            await self.user_startup(ctx)
-
-
-    @discord.slash_command()
-    async def select_starter(self, ctx):
+    async def select_starter(self, user, interaction):
         # TODO: change from command to auto-thing
-        user = await self.check_user(ctx)
+
         #user = db.get_user(ctx.author.id)
         text = ""
-        starter_characters = ['Charwaifander', 'Sqwifetle', 'Bulbwaifsaur']
+        starter_characters = ['1', '2', '3']
         for char in starter_characters:
             text+=char+'\n'
 
@@ -143,13 +122,47 @@ class MainMenu(commands.Cog):
             async def button3_callback(self, button, interaction):
                 await interaction.response.send_message(f"You selected {starter_characters[2]}!")
 
-        await ctx.respond(text, view=MyView())
+        await interaction.response.edit_message(content=text, view=MyView())
+
+
+    async def user_startup(self, ctx):
+        select_starter = self.select_starter
+        # TODO: privacy policy link
+        # short description of game?
+        class MyView(discord.ui.View):
+            @discord.ui.button(label='Yes', style=discord.ButtonStyle.green)
+            async def button_callback_yes(self, button, interaction):
+                user = db.add_user(ctx.author.id)
+                await select_starter(user, interaction)
+                #await interaction.response.edit_message(view=newView())#self)
+                #await interaction.response.send_message(f"You selected {starter_characters[0]}!")
+            @discord.ui.button(label='No', style=discord.ButtonStyle.red)
+            async def button_callback_no(self, button, interaction):
+                await interaction.delete_original_response(delay=2)
+                #await interaction.response.edit_message(view=newView())
+                #await interaction.response.send_message(f"You selected {starter_characters[0]}!")
+        await ctx.respond("Do you want to play a game?", view=MyView())
+
+
+
+    async def check_user(self, ctx):
+        user = db.get_user(ctx.author.id)
+        if user:
+            return user
+        else:
+            await self.user_startup(ctx)
+            return False
+
+
 
     @discord.slash_command()
     async def select_character(self, ctx):
         options = []
         
-        user = db.get_user(ctx.author.id)
+        user = await self.check_user(ctx)
+        if not user:
+            return
+
         characters = db.get_owned_characters(user.id)
         for char in characters:
             options.append(discord.SelectOption(
@@ -174,7 +187,9 @@ class MainMenu(commands.Cog):
     @discord.slash_command()
     async def test_fight(self, ctx):
         difficulty = 'easy'
-        user = db.get_user(ctx.author.id)
+        user = await self.check_user(ctx)
+        if not user:
+            return
         player = Player(db.get_selected_character(user.id))
 
         enemy = Enemy(db.get_monster(difficulty))
